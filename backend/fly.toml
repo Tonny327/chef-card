@@ -19,6 +19,13 @@ primary_region = 'fra'
   min_machines_running = 1
   processes = ['app']
 
+  [[http_service.checks]]
+    grace_period = "120s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    timeout = "2s"
+
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'

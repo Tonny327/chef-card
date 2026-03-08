@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: chefcard-postgres
+    environment:
+      POSTGRES_USER: chefcard
+      POSTGRES_PASSWORD: chefcard
+      POSTGRES_DB: chefcard
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chefcard -d chefcard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: chefcard-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/chefcard
+      SPRING_DATASOURCE_USERNAME: chefcard
+      SPRING_DATASOURCE_PASSWORD: chefcard
+
+volumes:
+  postgres_data:

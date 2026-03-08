@@ -1,0 +1,13 @@
+# Netlify — сборка и публикация фронтенда
+# VITE_API_URL задаётся в Netlify: Site settings → Environment variables
+# Если репо — корень с папкой frontend/, в Netlify укажи Base directory: frontend
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: все маршруты ведут на index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Clock, ArrowRight, X, ZoomIn, ZoomOut, Maximize, Eye, EyeOff } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { RecipeDto } from '../api';
-import { getPublicRecipes } from '../api';
+import { getPublicRecipes, getImageUrl } from '../api';
 
 export function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +95,7 @@ export function Home() {
             >
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 shadow-md bg-white">
                 <img
-                  src={recipe.imageUrl}
+                  src={getImageUrl(recipe.imageUrl)}
                   alt={recipe.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   loading="lazy"
@@ -160,7 +160,7 @@ export function Home() {
                 <>
                   <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full !h-full flex items-center justify-center">
                     <img 
-                      src={selectedRecipe.imageUrl} 
+                      src={getImageUrl(selectedRecipe.imageUrl)} 
                       alt={selectedRecipe.title} 
                       className="w-full max-w-full max-h-dvh object-contain select-none"
                       draggable={false}

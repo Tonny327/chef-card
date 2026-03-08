@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Calendar, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import type { RecipeDto } from '../api';
-import { getAllRecipes, deleteRecipe } from '../api';
+import { getAllRecipes, deleteRecipe, getImageUrl } from '../api';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -86,7 +86,7 @@ export function AdminDashboard() {
                   <td className="px-8 py-6">
                     <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm bg-[#fdfbf7]">
                       <img 
-                        src={recipe.imageUrl} 
+                        src={getImageUrl(recipe.imageUrl)} 
                         alt={recipe.title} 
                         className="w-full h-full object-cover"
                         loading="lazy"

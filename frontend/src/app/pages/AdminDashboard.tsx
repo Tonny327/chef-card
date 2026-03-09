@@ -96,12 +96,15 @@ export function AdminDashboard() {
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2 text-[#1f2937]/60">
                       <Calendar className="w-4 h-4" />
-                      <span className="text-sm font-medium">ID: {recipe.id}</span>
+                      <span className="text-sm font-medium">
+                        {new Date(recipe.createdAt).toLocaleDateString('ru-RU')}
+                      </span>
                     </div>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                       <button 
+                        onClick={() => navigate(`/admin/edit/${recipe.id}`, { state: { recipe } })}
                         className="p-2.5 text-[#1f2937]/40 hover:text-[#047857] hover:bg-[#047857]/5 rounded-lg transition-all"
                         aria-label="Редактировать"
                       >

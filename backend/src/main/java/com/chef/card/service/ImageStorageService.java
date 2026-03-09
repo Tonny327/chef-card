@@ -35,5 +35,24 @@ public class ImageStorageService {
 
         return "/uploads/" + filename;
     }
+
+    public void delete(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+        try {
+            String filename = imageUrl.replaceFirst("^/uploads/", "");
+            if (filename.isBlank()) {
+                return;
+            }
+            Path uploadPath = Paths.get(System.getProperty("user.dir"), UPLOAD_DIR)
+                    .toAbsolutePath()
+                    .normalize();
+            Path target = uploadPath.resolve(filename);
+            Files.deleteIfExists(target);
+        } catch (IOException ignored) {
+            // игнорируем ошибки удаления, чтобы не ломать основной поток
+        }
+    }
 }
 

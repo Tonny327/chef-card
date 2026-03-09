@@ -33,6 +33,12 @@ public class RecipeService {
         return recipeRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public Recipe getById(Long id) {
+        return recipeRepository.findById(id)
+                .orElseThrow(() -> new RecipeNotFoundException("Recipe not found with id: " + id));
+    }
+
     @Transactional
     public Recipe updateRecipe(Long id, Recipe recipe) {
         Recipe existing = recipeRepository.findById(id)

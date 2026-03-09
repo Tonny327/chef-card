@@ -15,4 +15,10 @@
             );
         </sql>
     </changeSet>
+    <changeSet id="002-add-recipes-created-at" author="chefcard">
+        <sql>
+            ALTER TABLE recipes
+            ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+        </sql>
+    </changeSet>
 </databaseChangeLog>

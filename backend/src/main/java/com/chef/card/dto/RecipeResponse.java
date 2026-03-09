@@ -16,4 +16,5 @@ public class RecipeResponse {
     private String description;
     private String imageUrl;
     private Integer preparationTime;
+    private java.time.OffsetDateTime createdAt;
 }

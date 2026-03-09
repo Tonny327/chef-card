@@ -43,6 +43,7 @@ public class RecipeController {
                 .description(recipe.getDescription())
                 .imageUrl(recipe.getImageUrl())
                 .preparationTime(recipe.getPreparationTime())
+                .createdAt(recipe.getCreatedAt())
                 .build();
     }
 }

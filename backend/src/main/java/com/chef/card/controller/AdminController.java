@@ -77,6 +77,35 @@ public class AdminController {
         return ResponseEntity.ok(toResponse(updated));
     }
 
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RecipeResponse> updateRecipeWithImage(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam("preparationTime") Integer preparationTime,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) throws Exception {
+
+        Recipe existing = recipeService.getById(id);
+        String imageUrl = existing.getImageUrl();
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imageStorageService.delete(imageUrl);
+            imageUrl = imageStorageService.store(imageFile);
+        }
+
+        RecipeRequest request = RecipeRequest.builder()
+                .title(title)
+                .description(description)
+                .imageUrl(imageUrl)
+                .preparationTime(preparationTime)
+                .build();
+
+        Recipe recipe = toEntity(request);
+        Recipe updated = recipeService.updateRecipe(id, recipe);
+
+        return ResponseEntity.ok(toResponse(updated));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
         recipeService.deleteRecipe(id);
@@ -99,6 +128,7 @@ public class AdminController {
                 .description(recipe.getDescription())
                 .imageUrl(recipe.getImageUrl())
                 .preparationTime(recipe.getPreparationTime())
+                .createdAt(recipe.getCreatedAt())
                 .build();
     }
 }

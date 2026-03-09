@@ -4,6 +4,7 @@ export interface RecipeDto {
   description: string | null;
   imageUrl: string | null;
   preparationTime: number;
+  createdAt: string;
 }
 
 export interface CreateOrUpdateRecipePayload {
@@ -73,6 +74,37 @@ export async function createRecipe(authToken: string, payload: CreateOrUpdateRec
 export async function createRecipeWithImage(authToken: string, formData: FormData): Promise<RecipeDto> {
   const response = await fetch(`${API_BASE}/admin/recipes`, {
     method: 'POST',
+    headers: {
+      Authorization: `Basic ${authToken}`,
+    },
+    body: formData,
+  });
+  return handleResponse<RecipeDto>(response);
+}
+
+export async function updateRecipe(
+  authToken: string,
+  id: number,
+  payload: CreateOrUpdateRecipePayload
+): Promise<RecipeDto> {
+  const response = await fetch(`${API_BASE}/admin/recipes/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${authToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<RecipeDto>(response);
+}
+
+export async function updateRecipeWithImage(
+  authToken: string,
+  id: number,
+  formData: FormData
+): Promise<RecipeDto> {
+  const response = await fetch(`${API_BASE}/admin/recipes/${id}`, {
+    method: 'PUT',
     headers: {
       Authorization: `Basic ${authToken}`,
     },

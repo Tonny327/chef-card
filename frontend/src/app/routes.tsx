@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AddRecipe } from './pages/AddRecipe';
+import { EditRecipe } from './pages/EditRecipe';
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +26,11 @@ export const router = createBrowserRouter([
       {
         path: 'admin/new',
         Component: AddRecipe,
-      }
+      },
+      {
+        path: 'admin/edit/:id',
+        Component: EditRecipe,
+      },
     ],
   },
 ]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Clock, ArrowRight, X, ZoomIn, ZoomOut, Maximize, Eye, EyeOff } from 'lucide-react';
+import { Search, Clock, ArrowRight, X, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { RecipeDto } from '../api';
 import { getPublicRecipes, getImageUrl } from '../api';
@@ -129,26 +129,31 @@ export function Home() {
       {selectedRecipe && (
         <div className="fixed inset-0 z-[100] bg-black/95 animate-in fade-in duration-300 flex flex-col min-h-dvh w-full">
           {/* Header Controls */}
-          <div className={`absolute top-0 left-0 right-0 z-10 flex justify-between items-start p-4 sm:p-6 pointer-events-none transition-colors duration-500 ${showUI ? 'bg-gradient-to-b from-black/60 to-transparent' : ''}`}>
-            <div className={`text-white drop-shadow-md pointer-events-auto max-w-[75%] transition-opacity duration-500 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">{selectedRecipe.title}</h3>
-              <div className="flex items-center gap-1.5 text-white/80 text-sm">
-                <Clock className="w-4 h-4" />
-                <span>{selectedRecipe.preparationTime} мин</span>
+          {showUI && (
+            <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-start p-4 sm:p-6 pointer-events-none bg-gradient-to-b from-black/60 to-transparent">
+              <div className="text-white drop-shadow-md pointer-events-auto max-w-[75%]">
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">{selectedRecipe.title}</h3>
+                <div className="flex items-center gap-1.5 text-white/80 text-sm">
+                  <Clock className="w-4 h-4" />
+                  <span>{selectedRecipe.preparationTime} мин</span>
+                </div>
               </div>
+              
+              <button 
+                className="p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full transition-colors text-white pointer-events-auto shadow-lg"
+                onClick={() => setSelectedRecipe(null)}
+                aria-label="Закрыть"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            
-            <button 
-              className="p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full transition-colors text-white pointer-events-auto shadow-lg"
-              onClick={() => setSelectedRecipe(null)}
-              aria-label="Закрыть"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+          )}
 
           {/* Interactive Zoomable Image Area */}
-          <div className="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing">
+          <div
+            className="flex-1 w-full h-full relative cursor-grab active:cursor-grabbing"
+            onClick={() => setShowUI((prev) => !prev)}
+          >
             <TransformWrapper
               initialScale={1}
               minScale={0.5}
@@ -168,53 +173,50 @@ export function Home() {
                   </TransformComponent>
 
                   {/* Right-side Controls Overlay */}
-                  <div className="absolute right-4 bottom-32 sm:bottom-8 sm:right-8 flex flex-col gap-2 z-10 pointer-events-auto">
-                    {/* Toggle UI Button */}
-                    <button 
-                      onClick={() => setShowUI(!showUI)} 
-                      className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg mb-2"
-                      aria-label={showUI ? "Скрыть описание" : "Показать описание"}
-                      title={showUI ? "Скрыть описание" : "Показать описание"}
+                  {showUI && (
+                    <div
+                      className="absolute right-4 bottom-32 sm:bottom-8 sm:right-8 flex flex-col gap-2 z-10 pointer-events-auto"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {showUI ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                    
-                    {/* Zoom Controls */}
-                    <button 
-                      onClick={() => zoomIn()} 
-                      className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
-                      aria-label="Увеличить"
-                    >
-                      <ZoomIn className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => zoomOut()} 
-                      className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
-                      aria-label="Уменьшить"
-                    >
-                      <ZoomOut className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => resetTransform()} 
-                      className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
-                      aria-label="Сбросить масштаб"
-                    >
-                      <Maximize className="w-5 h-5" />
-                    </button>
-                  </div>
+                      {/* Zoom Controls */}
+                      <button 
+                        onClick={() => zoomIn()} 
+                        className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
+                        aria-label="Увеличить"
+                      >
+                        <ZoomIn className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => zoomOut()} 
+                        className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
+                        aria-label="Уменьшить"
+                      >
+                        <ZoomOut className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => resetTransform()} 
+                        className="p-3 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors shadow-lg"
+                        aria-label="Сбросить масштаб"
+                      >
+                        <Maximize className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </TransformWrapper>
           </div>
 
           {/* Description Footer */}
-          <div className={`absolute bottom-0 left-0 right-0 z-10 p-4 sm:p-8 pointer-events-none transition-all duration-500 ${showUI ? 'bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-100' : 'opacity-0'}`}>
-            <div className="max-w-3xl mx-auto pointer-events-auto">
-              <p className="text-white/90 text-sm sm:text-base leading-relaxed drop-shadow-md pb-4 sm:pb-0">
-                {selectedRecipe.description}
-              </p>
+          {showUI && (
+            <div className="absolute bottom-0 left-0 right-0 z-10 p-4 sm:p-8 pointer-events-none bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+              <div className="max-w-3xl mx-auto pointer-events-auto">
+                <p className="text-white/90 text-sm sm:text-base leading-relaxed drop-shadow-md pb-4 sm:pb-0">
+                  {selectedRecipe.description}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

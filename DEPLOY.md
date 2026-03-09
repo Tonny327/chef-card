@@ -1,84 +1,67 @@
-# Деплой: Netlify (фронтенд) + Fly.io (бэкенд)
+# Деплой: Netlify (фронтенд) + Koyeb (бэкенд)
 
-## 1. Бэкенд на Fly.io
+## 1. Бэкенд на Koyeb
 
-### 1.1 Установка flyctl
+Бэкенд уже готов к запуску на любом хостинге:
 
-```powershell
-# Windows (PowerShell) — официальный способ
-powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
-```
+- слушает порт из переменной `PORT` (`server.port=${PORT:8085}`);
+- берёт параметры базы из env `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`;
+- CORS‑оригины задаются через `CORS_ALLOWED_ORIGINS`;
+- есть health‑endpoint `GET /health`.
 
-После установки перезапусти терминал. Проверка: `fly version`.
+Ниже — пример деплоя **через Docker + панель Koyeb**.
 
-Альтернатива: если установлен Chocolatey — `choco install flyctl`.
+### 1.1 Подготовка Docker‑образа (опционально)
 
-### 1.2 Авторизация
+Koyeb умеет сам строить Docker‑образ из репозитория, где есть `backend/Dockerfile`.  
+Если хочешь пушить свой образ, собери и запушь его в любой registry (Docker Hub и т.п.) и укажи в Koyeb.
 
-```bash
-fly auth login
-```
+### 1.2 Создание PostgreSQL на Koyeb
 
-### 1.3 Создание PostgreSQL
+1. В панели Koyeb: **Create → Database → PostgreSQL**.
+2. Заполни:
+   - `POSTGRES_DB`: `chefcard`
+   - `POSTGRES_USER`: например `chefcard`
+   - `POSTGRES_PASSWORD`: сгенерируй надёжный пароль и сохрани.
+3. После создания открой вкладку **Connection info** и скопируй **Internal connection string** вида:
 
-```bash
-fly postgres create --name chefcard-db
-```
+   `postgresql://chefcard:PASSWORD@postgres-xxxxx.internal:5432/chefcard`
 
-- Выбери регион (например, `ams` — Амстердам).
-- Выбери конфигурацию **Development** (бесплатный тариф).
-- Сохрани вывод — понадобится для подключения.
+   Преобразуй её в JDBC‑формат:
 
-### 1.4 Привязка PostgreSQL к приложению
+   `jdbc:postgresql://postgres-xxxxx.internal:5432/chefcard`
 
-Сначала создай приложение (если ещё не создано):
+### 1.3 Создание сервиса backend
 
-```bash
-cd backend
-fly launch --no-deploy --name chefcard-api
-```
+1. В панели Koyeb: **Create → Service**.
+2. Источник:
+   - **Git Repository**
+   - репозиторий: `chef-card`
+   - **Build context / App path**: `backend`
+   - Dockerfile path: `backend/Dockerfile` (или оставь по умолчанию, если Koyeb его находит сам).
+3. В разделе **Ports**:
+   - Expose port: `8080`
+   - Protocol: `HTTP`
+4. В разделе **Environment variables** добавь:
 
-При вопросе про перезапись `fly.toml` выбери **No**, чтобы сохранить текущую конфигурацию.
+   | Key                           | Value                                                                 |
+   |------------------------------|-----------------------------------------------------------------------|
+   | `SPRING_DATASOURCE_URL`      | `jdbc:postgresql://postgres-xxxxx.internal:5432/chefcard`            |
+   | `SPRING_DATASOURCE_USERNAME` | `POSTGRES_USER` из шага 1.2 (например `chefcard`)                     |
+   | `SPRING_DATASOURCE_PASSWORD` | `POSTGRES_PASSWORD` из шага 1.2                                       |
+   | `CORS_ALLOWED_ORIGINS`       | `https://chef-card.netlify.app` (URL фронтенда, когда он будет готов) |
 
-Затем привяжи базу:
+   Переменную `PORT` Koyeb задаёт автоматически (обычно `8080`), наш бэкенд её уже читает.
 
-```bash
-fly postgres attach chefcard-db -a chefcard-api
-```
+5. Нажми **Deploy**. После деплоя у сервиса будет URL вида  
+   `https://chefcard-api.koyeb.app` (название будет зависеть от выбранного имени сервиса).
 
-Команда выведет строку вида:
-`DATABASE_URL=postgres://chefcard_api:XXXXX@chefcard-db.flycast:5432/chefcard_api`
+Проверь:
 
-### 1.5 Установка секретов
+- `https://<твой-сервис>.koyeb.app/health` → должен вернуть `ok`
+- `https://<твой-сервис>.koyeb.app/api/recipes` → должен вернуть JSON (`[]` или список)
 
-Преобразуй вывод в JDBC-формат и задай секреты:
-
-```bash
-fly secrets set \
-  SPRING_DATASOURCE_URL="jdbc:postgresql://chefcard-db.flycast:5432/chefcard_api" \
-  SPRING_DATASOURCE_USERNAME="chefcard_api" \
-  SPRING_DATASOURCE_PASSWORD="ПАРОЛЬ_ИЗ_ВЫВОДА_ATTACH" \
-  -a chefcard-api
-```
-
-Имя БД и пользователя (`chefcard_api`) возьми из своей строки `DATABASE_URL`.
-
-### 1.6 CORS (после деплоя фронта на Netlify)
-
-Когда получишь URL Netlify (например, `https://chefcard.netlify.app`):
-
-```bash
-fly secrets set CORS_ALLOWED_ORIGINS="https://chefcard.netlify.app" -a chefcard-api
-```
-
-### 1.7 Деплой
-
-```bash
-cd backend
-fly deploy
-```
-
-После деплоя получишь URL бэкенда, например: `https://chefcard-api.fly.dev`
+Старый `fly.toml` в репозитории можно игнорировать — он больше не используется.
 
 ---
 
@@ -106,9 +89,9 @@ fly deploy
 
 | Key | Value |
 |-----|-------|
-| `VITE_API_URL` | `https://chefcard-api.fly.dev` |
+| `VITE_API_URL` | `https://<твой-сервис>.koyeb.app` |
 
-(Замени на свой URL бэкенда с Fly.io.)
+(Замени на реальный URL бэкенда на Koyeb, например `https://chefcard-api.koyeb.app`.)
 
 ### 2.4 Деплой
 

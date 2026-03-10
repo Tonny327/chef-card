@@ -49,8 +49,8 @@ public class ImageStorageService {
                     .credentialsProvider(StaticCredentialsProvider.create(
                             AwsBasicCredentials.create(accessKey, secretKey)
                     ))
-                    // регион для R2 не важен, но требование SDK
-                    .region(Region.EU_CENTRAL_1)
+                    // Cloudflare R2 использует псевдо-регион "auto"
+                    .region(Region.of("auto"))
                     .serviceConfiguration(config)
                     .build();
         }

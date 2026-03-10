@@ -108,6 +108,8 @@ public class AdminController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
+        Recipe existing = recipeService.getById(id);
+        imageStorageService.delete(existing.getImageUrl());
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
     }

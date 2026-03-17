@@ -31,6 +31,9 @@ Koyeb умеет сам строить Docker‑образ из репозито
 
    `jdbc:postgresql://postgres-xxxxx.internal:5432/chefcard`
 
+**Альтернатива: база в Neon (без лимита 5 ч/мес)**  
+Подробная инструкция: [docs/NEON-SETUP.md](docs/NEON-SETUP.md). После настройки Neon подставь в переменные backend (раздел 1.3 ниже) JDBC URL, логин и пароль из Neon.
+
 ### 1.3 Создание сервиса backend
 
 1. В панели Koyeb: **Create → Service**.
